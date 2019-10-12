@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/JNP1_1_projekt.dir/main.cpp.o  -o JNP1_1_projekt 

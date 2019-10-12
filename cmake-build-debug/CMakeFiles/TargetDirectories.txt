@@ -1,0 +1,3 @@
+/home/baka475/CLionProjects/JNP1_1_projekt/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/baka475/CLionProjects/JNP1_1_projekt/cmake-build-debug/CMakeFiles/JNP1_1_projekt.dir
+/home/baka475/CLionProjects/JNP1_1_projekt/cmake-build-debug/CMakeFiles/edit_cache.dir
