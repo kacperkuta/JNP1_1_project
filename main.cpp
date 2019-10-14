@@ -14,6 +14,11 @@ using std::cin;
 using std::cerr;
 using std::list;
 
+using ticket_struct = pair<string, pair<double, int>>;
+using route_struct = vector<pair<pair<int, int>, string>>;
+using tickets_vector = vector<ticket_struct>;
+using timetable_struct = map<int, route_struct>;
+
 #define IMPOSSIBLE_RIDE -1
 #define MINUTES_PER_HOUR 60
 
@@ -24,9 +29,9 @@ using std::list;
  * @return @p true if the sign is a letter, @p false otherwise
  */
 bool isLetter(char sign) {
-    if ((int) (sign) >= (int) ('a') && (int) (sign) <= (int) ('z'))
+    if ((int)(sign) >= (int)('a') && (int)(sign) <= (int)('z'))
         return true;
-    else return ((int) (sign) >= (int) ('A') && (int) (sign) <= (int) ('Z'));
+    else return ((int)(sign) >= (int)('A') && (int)(sign) <= (int)('Z'));
 }
 
 /**@brief check is the sign a cipher
@@ -73,14 +78,13 @@ pair<int, int> selectValidityTime(string line, int position) {
     if (!isNumber(line[position]) || line[position] == '0')
         return make_pair(-1, -1);
     int number = (int)(line[position]) - (int)('0');
-    position ++;
+    position++;
 
     while (position < line.size() && isNumber(line[position])) {
         number *= 10;
         number += (int)(line[position]) - (int)('0');
         position++;
     }
-
     return make_pair(number, position);
 }
 
@@ -91,7 +95,7 @@ pair<int, int> selectValidityTime(string line, int position) {
  * @param minute - minutes of time
  * @return @p true if trams are working, @p false otherwise
  */
-bool areTramsWorking (int hour, int minute) {
+bool areTramsWorking(int hour, int minute) {
 
     if (hour < 5 || hour > 21)
         return false;
@@ -177,7 +181,7 @@ pair<double, int> selectPrice(string line, int start) {
     for (int converter = 10; converter < 101; converter += 90) {
         if (!isNumber(line[position]))
             return make_pair(-1, -1);
-        price += ((double) (line[position]) - (double) ('0')) / (double)(converter);
+        price += ((double)(line[position]) - (double)('0')) / (double)(converter);
         position ++;
     }
 
@@ -254,13 +258,12 @@ bool biggerTime(int hour, int minute, int pHour, int pMinute) {
  * @return @p true if the route with the given number already exist,
  * @p false otherwise
  */
-bool routeAlreadyExist(int numberOfRoute,
-                       map<int, vector<pair<pair<int, int>, string> > >* timetable) {
+bool routeAlreadyExist(int numberOfRoute, timetable_struct* timetable) {
 
     map<int, vector<pair<pair<int, int>, string> > >::iterator it;
 
-    for (it = (*timetable).begin(); it != (*timetable).end(); ++it) {
-        if ((*it).first == numberOfRoute)
+    for (it = timetable->begin(); it != timetable->end(); ++it) {
+        if (it->first == numberOfRoute)
             return true;
     }
     return false;
@@ -273,11 +276,10 @@ bool routeAlreadyExist(int numberOfRoute,
  * @return @p true if the ticket with the given name already exist,
  * @p false otherwise
  */
-bool ticketAlreadyExist(string * ticketName,
-                        vector<pair<string, pair<double, int> > >* tickets) {
+bool ticketAlreadyExist(string* ticketName, tickets_vector* tickets) {
 
     for (pair<string, pair<double, int> >& ticket : *tickets) {
-        if (ticket.first == (*ticketName))
+        if (ticket.first == *ticketName)
             return true;
     }
     return false;
@@ -290,11 +292,10 @@ bool ticketAlreadyExist(string * ticketName,
  * @param route - vector with previous way of the route
  * @return @true if the stop is visiting by the second time, @p false otherwise
  */
-bool busStopRevisited(string * busStopName,
-                      vector<pair<pair<int, int>, string> > route) {
+bool busStopRevisited(string * busStopName, route_struct route) {
 
     for (pair<pair<int, int>, string>& busStop : route) {
-        if (busStop.second == (*busStopName))
+        if (busStop.second == *busStopName)
             return true;
     }
     return false;
@@ -307,8 +308,7 @@ bool busStopRevisited(string * busStopName,
  * @param numberOfLine - number of line in input
  * @param timetable - reference to map where the routes are adding
  */
-void loadNewRoute(string line, int numberOfLine,
-                  map<int, vector<pair<pair<int, int>, string> > >* timetable) {
+void loadNewRoute(string line, int numberOfLine, timetable_struct* timetable) {
 
     pair<int, int> routeNumber = selectRouteNumber(line, 0);
     int numberOfRoute = routeNumber.first;
@@ -376,8 +376,7 @@ void loadNewRoute(string line, int numberOfLine,
  * @param numberOfLine - number of line in input
  * @param tickets - vector with all tickets
  */
-void loadNewTicket(string line, int numberOfLine,
-                   vector<pair<string, pair<double, int> > >* tickets) {
+void loadNewTicket(string line, int numberOfLine, tickets_vector* tickets) {
 
     pair<string, int> name = selectTicketName(line, 0);
     string ticketName = name.first;
@@ -387,7 +386,7 @@ void loadNewTicket(string line, int numberOfLine,
         cerr << numberOfLine << " " << line << "\n";
         return;
     }
-    position ++;
+    position++;
 
     pair<double, int> priceResult = selectPrice(line, position);
     double price = priceResult.first;
@@ -397,7 +396,7 @@ void loadNewTicket(string line, int numberOfLine,
         cerr << numberOfLine << " " << line << "\n";
         return;
     }
-    position ++;
+    position++;
 
     pair<int, int> validity = selectValidityTime(line, position);
     int validityTime = validity.first;
@@ -407,9 +406,8 @@ void loadNewTicket(string line, int numberOfLine,
         cerr << numberOfLine << " " << line << "\n";
         return;
     }
-    tickets -> emplace_back(make_pair(ticketName, make_pair(price, validityTime)));
+    tickets->emplace_back(make_pair(ticketName, make_pair(price, validityTime)));
 }
-
 
 /** @brief Function, which reads line started with '?' sign. (Inquiry line)
  * @param line String containing line of input started with '?'.
@@ -419,27 +417,28 @@ void loadNewTicket(string line, int numberOfLine,
  * equals @p IMPOSSIBLE_RIDE.
  * @return @p true if error was signaled on cerr, @p false otherwise.
  */
-bool loadNewQuestion(string line, int numberOfLine, list<pair<string, int>> * question) {
+bool loadNewQuestion(string line, int numberOfLine, list<pair<string,
+        int>>* question) {
      int position = 2;
 
      if (line.length() <= 2 || line[1] != ' ') {
-         cerr << numberOfLine << " " << line << std::endl;
+         cerr << numberOfLine << " " << line << "\n";
          return true;
      }
      while (position < line.length()) {
          pair<string, int> element = selectBusStop(line, position);
 
          if ((position = element.second) == line.length() ) {
-             if (question -> empty()) {
-                 cerr << numberOfLine << " " << line << std::endl;
+             if (question->empty()) {
+                 cerr << numberOfLine << " " << line << "\n";
                  return true;
              }
-             question -> emplace_back(make_pair(element.first, IMPOSSIBLE_RIDE)); //last element
+             question->emplace_back(make_pair(element.first, IMPOSSIBLE_RIDE)); //last element
              return false;
          }
          if (element.second == 0 || line[position] != ' ' ||
                 position == line.length() - 1) {
-             cerr << numberOfLine << " " << line << std::endl;
+             cerr << numberOfLine << " " << line << "\n";
              return true;
          } else {
              position++;
@@ -449,12 +448,12 @@ bool loadNewQuestion(string line, int numberOfLine, list<pair<string, int>> * qu
 
          if (route.second == 0 || line[position = route.second] != ' ' ||
                 position >= line.length() - 1) {
-             cerr << numberOfLine << " " << line << std::endl;
+             cerr << numberOfLine << " " << line << "\n";
              return true;
          } else {
              position++;
          }
-         question -> emplace_back(element.first, route.first);
+         question->emplace_back(element.first, route.first);
      }
      return false;
 }
@@ -469,8 +468,8 @@ bool loadNewQuestion(string line, int numberOfLine, list<pair<string, int>> * qu
  * Second pair contains hour and minutes of arrival if ride has been found,
  * UB otherwise.
  */
-pair <pair<int, int>, pair<int, int>> oneRouteRide(string * startStop,string * finalStop,
-        int routeNumber, map<int, vector<pair<pair<int, int>, string>>> * timetable) {
+pair <pair<int, int>, pair<int, int>> oneRouteRide(string* startStop,
+        string* finalStop, int routeNumber, timetable_struct* timetable) {
     if (timetable -> count(routeNumber) > 0) {
        vector<pair<pair<int, int>, string> > route = (*timetable)[routeNumber];
        pair<int, int> departure = make_pair(IMPOSSIBLE_RIDE,IMPOSSIBLE_RIDE);
@@ -498,7 +497,7 @@ pair <pair<int, int>, pair<int, int>> oneRouteRide(string * startStop,string * f
  * @param secondTime Second time.
  * @return Time difference in minutes between times above.
  */
-int timeDifference(pair<int, int> * firstTime, pair<int, int> * secondTime){
+int timeDifference(pair<int, int>* firstTime, pair<int, int>* secondTime) {
     int minutes = 0;
     minutes += (secondTime -> first - firstTime -> first) * MINUTES_PER_HOUR;
     return minutes + (secondTime -> second - firstTime -> second);
@@ -510,8 +509,8 @@ int timeDifference(pair<int, int> * firstTime, pair<int, int> * secondTime){
  * On its 1. field duration of ride if its possible, @p IMPOSSIBLE_RIDE otherwise.
  * On its 2. field name of the stop on which passenger must wait, if such exists; otherwise empty string.
  */
-pair<int, string> rideTime(list<pair<string, int>> * ride,
-        map<int, vector<pair<pair<int, int>, string>>> * timetable) {
+pair<int, string> rideTime(list<pair<string, int>>* ride,
+        timetable_struct* timetable) {
 
     int duration = 0;
     string stopOfBreak;
@@ -530,21 +529,23 @@ pair<int, string> rideTime(list<pair<string, int>> * ride,
 
         departure = passageTime.first;
 
-        if (departure.first == IMPOSSIBLE_RIDE || biggerTime(arrival.first, arrival.second, departure.first, departure.second))
+        if (departure.first == IMPOSSIBLE_RIDE ||
+                biggerTime(arrival.first, arrival.second,
+                departure.first, departure.second))
             return pair<int, string>(IMPOSSIBLE_RIDE, "");
-        else if (biggerTime(departure.first, departure.second, arrival.first, arrival.second) &&
+        else if (biggerTime(departure.first, departure.second,
+                arrival.first, arrival.second) &&
                 arrival.first != IMPOSSIBLE_RIDE) {
 
-            cout << departure.first << departure.second << std::endl;
-            cout << arrival.first << arrival.second << std::endl;
+            cout << departure.first << departure.second << "\n";
+            cout << arrival.first << arrival.second << "\n";
 
             return pair<int, string>(IMPOSSIBLE_RIDE, firstStop.first);
         }
-
         arrival = passageTime.second;
         duration += timeDifference(&departure, &arrival);
     }
-    return pair<int, string> (duration, "");
+    return pair<int, string>(duration + 1, "");
 }
 
 /** @brief Counts sum of prices of tickets.
@@ -553,12 +554,12 @@ pair<int, string> rideTime(list<pair<string, int>> * ride,
  * @return Sum of tickets' prices in vector if it contains any ticket.
  * @p DBL_MAX if vector is empty();
  */
-double summaryPrice(vector<pair<string, pair<double, int>>> * tickets) {
-    if (tickets -> empty())
+double summaryPrice(tickets_vector* tickets) {
+    if (tickets->empty())
         return DBL_MAX;
 
     double sum = 0;
-    for (pair<string, pair<double, int>>& ticket : *tickets) {
+    for (ticket_struct& ticket : *tickets) {
         sum += ticket.second.first;
     }
     return sum;
@@ -571,10 +572,10 @@ double summaryPrice(vector<pair<string, pair<double, int>>> * tickets) {
  * @return Pointer to the best set if at least one ticket set is not empty.
  * Empty vector pointer otherwise.
  */
-vector <pair<string, pair<double, int>>> * chooseBest(
-        vector <pair<string, pair<double, int>>> * v1,
-        vector <pair<string, pair<double, int>>> * v2,
-        vector <pair<string, pair<double, int>>> * v3) {
+vector <ticket_struct> * chooseBest(
+        vector <ticket_struct>* v1,
+        vector <ticket_struct>* v2,
+        vector <ticket_struct>* v3) {
     double price1 = summaryPrice(v1);
     double price2 = summaryPrice(v2);
     double price3 = summaryPrice(v3);
@@ -594,9 +595,9 @@ vector <pair<string, pair<double, int>>> * chooseBest(
  * @param result Pointer to vector with the best tickets set.
  * Empty vector if such set does not exist.
  */
-size_t displayResult(vector<pair<string, pair<double, int>>> result) {
+size_t displayResult(tickets_vector result) {
     if (result.empty()) {
-        std::cout << ":-|" << std::endl;
+        std::cout << ":-|" << "\n";
         return 0;
     } else {
         std::cout << "! ";
@@ -605,7 +606,7 @@ size_t displayResult(vector<pair<string, pair<double, int>>> result) {
                 std::cout << ";";
             std::cout << result[i].first;
         }
-        std::cout << std::endl;
+        std::cout << "\n";
         return result.size();
     }
 }
@@ -617,13 +618,12 @@ size_t displayResult(vector<pair<string, pair<double, int>>> result) {
  * @return Vector with the best set if such exists.
  * Empty vector otherwise.
  */
-vector<pair<string, pair<double, int>>> bestSet(int time, vector<pair<string,
-        pair<double, int>>> * tickets) {
+tickets_vector bestSet(int time, tickets_vector* tickets) {
     //Second table dimension equals 3, because of such tickets amount limitation.
-    vector<pair<string, pair<double, int>>> optSolution[time][3];
+    tickets_vector optSolution[time][3];
 
     for (int i = 0; i < time; i++) {
-        for (pair<string, pair<double, int>>& ticket : *tickets) {
+        for (ticket_struct& ticket : *tickets) {
 
             if (ticket.second.second >= i + 1 && summaryPrice(&optSolution[i][0]) >= ticket.second.first) {
                 optSolution[i][0].clear();
@@ -656,15 +656,15 @@ vector<pair<string, pair<double, int>>> bestSet(int time, vector<pair<string,
  * @p false, if not, due to impossible purchase of tickets or
  * ircorrect ride scheme.
  */
-bool ticketsInquiry(list<pair<string, int>> * ride, size_t * ticketsAmount,
-        vector<pair<string, pair<double, int>>> * tickets,
-        map<int, vector<pair<pair<int, int>, string>>> * timetable) {
+bool ticketsInquiry(list<pair<string, int>>* ride, size_t* ticketsAmount,
+        tickets_vector* tickets,
+        timetable_struct* timetable) {
 
     pair<int, string> time = rideTime(ride, timetable);
 
     if (time.first == IMPOSSIBLE_RIDE) {
         if (time.second.length() > 0)
-            cout << ":-( " << time.second << std::endl;
+            cout << ":-( " << time.second << "\n";
         else
             return false;
     } else {
@@ -677,8 +677,8 @@ bool ticketsInquiry(list<pair<string, int>> * ride, size_t * ticketsAmount,
  * @param timetable Pointer to trams timetable.
  * @param tickets Pointer to tickets pricelist.
  */
-void reactOnInput(map<int, vector<pair<pair<int, int>, string> > >* timetable,
-              vector<pair<string, pair<double, int> > >* tickets) {
+void reactOnInput(timetable_struct* timetable,
+              tickets_vector* tickets) {
 
     string line;
     int numberOfLine = 1;
@@ -704,13 +704,13 @@ void reactOnInput(map<int, vector<pair<pair<int, int>, string> > >* timetable,
 
         numberOfLine ++;
     }
-    cout << ticketsAmount << std::endl;
+    cout << ticketsAmount << "\n";
 }
 
 int main() {
 
-    map<int, vector<pair<pair<int, int>, string> > > timetable;
-    vector<pair<string, pair<double, int> > > tickets;
+    timetable_struct timetable;
+    tickets_vector tickets;
 
     reactOnInput(&timetable, &tickets);
 
