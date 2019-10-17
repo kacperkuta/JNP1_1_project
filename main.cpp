@@ -380,6 +380,7 @@ void loadNewTicket(string line, int numberOfLine, tickets_vector* tickets) {
 
     pair<string, int> name = selectTicketName(line, 0);
     string ticketName = name.first;
+    cout <<"a"<< ticketName << std::endl;
     int position = name.second;
 
     if (line[position] != ' ' || ticketAlreadyExist(&ticketName, tickets)) {
@@ -537,9 +538,6 @@ pair<int, string> rideTime(list<pair<string, int>>* ride,
                 arrival.first, arrival.second) &&
                 arrival.first != IMPOSSIBLE_RIDE) {
 
-            cout << departure.first << departure.second << "\n";
-            cout << arrival.first << arrival.second << "\n";
-
             return pair<int, string>(IMPOSSIBLE_RIDE, firstStop.first);
         }
         arrival = passageTime.second;
@@ -610,7 +608,6 @@ size_t displayResult(tickets_vector result) {
         return result.size();
     }
 }
-
 
 /** @brief Modified knapsack problem alghoritm, finds the best set of tickets for given ride time.
  * @param time Demanded ticket validity length.
